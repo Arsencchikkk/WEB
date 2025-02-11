@@ -1,25 +1,656 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Drug Search</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-        input { padding: 10px; width: 300px; margin-bottom: 10px; }
-        button { padding: 10px 20px; cursor: pointer; }
-        ul { list-style-type: none; padding: 0; }
-        li { padding: 10px; border: 1px solid #ccc; margin: 5px; }
-        .error { color: red; font-weight: bold; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Медицинская Платформа</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f8f9fa;
+      color: #333;
+      line-height: 1.6;
+    }
+    a { text-decoration: none; color: inherit; }
+    
+  
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 40px;
+      background-color: #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    header .logo {
+      font-size: 28px;
+      font-weight: 600;
+    }
+    header .logo span { color: #dc3545; }
+    header nav a { margin: 0 15px; font-weight: 500; transition: color 0.3s; }
+    header nav a:hover { color: #007BFF; }
+    header .auth-buttons button {
+      margin-left: 10px;
+      background: #007BFF;
+      border: none;
+      padding: 8px 15px;
+      color: #fff;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    header .auth-buttons button:hover { background: #0056b3; }
+    
+
+    .hero {
+      background: url('https://via.placeholder.com/1600x600') center/cover no-repeat;
+      position: relative;
+      padding: 25px 20px;
+      text-align: center;
+      color: #fff;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4);
+      z-index: 0;
+    }
+    .hero-content { position: relative; z-index: 1; }
+    .hero h1 { font-size: 30px; margin-bottom: 20px; }
+    .hero p { font-size: 20px; margin-bottom: 40px; }
+    .hero button {
+      background: #007BFF;
+      color: #fff;
+      border: none;
+      padding: 12px 30px;
+      font-size: 18px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .hero button:hover { background: #0056b3; }
+    
+ 
+    .horizontal-nav {
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 10px 40px;
+      display: flex;
+      justify-content: center;
+      position: sticky;
+      top: 70px; /* ниже шапки */
+      z-index: 90;
+    }
+    .horizontal-nav ul {
+      display: flex;
+      list-style: none;
+    }
+    .horizontal-nav ul li {
+      margin: 0 10px;
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    .horizontal-nav ul li:hover,
+    .horizontal-nav ul li.active {
+      color: #007BFF;
+      font-weight: 600;
+    }
+    
+  
+    .container {
+      display: flex;
+      max-width: 1400px;
+      margin: 40px auto;
+      padding: 0 20px;
+      gap: 20px;
+    }
+   
+    .main-content {
+      flex: 9;
+      background: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      min-height: 300px;
+    }
+    
+    .content-section { margin-bottom: 40px; }
+    
+    #home h2 { margin-bottom: 10px; }
+    #home p { margin-bottom: 30px; }
+    #home section { margin-bottom: 40px; }
+    #home section h3 { margin-bottom: 20px; font-size: 24px; }
+    
+
+    .articles-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .article-card {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      flex: 1 1 calc(33.333% - 20px);
+      transition: transform 0.3s;
+    }
+    .article-card:hover { transform: translateY(-5px); }
+    .article-card img {
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    .article-card h4 { margin-bottom: 8px; font-size: 18px; }
+    .article-card p { font-size: 14px; color: #555; }
+    
+
+    .news-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .news-item {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      display: flex;
+      gap: 15px;
+    }
+    .news-item img {
+      width: 150px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    .news-item .news-content h4 {
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+    .news-item .news-content p {
+      font-size: 14px;
+      color: #555;
+    }
+
+    .ads-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .ad-card {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      flex: 1 1 calc(50% - 20px);
+      text-align: center;
+    }
+    .ad-card img {
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    .ad-card p {
+      font-size: 14px;
+      color: #555;
+    }
+    
+  
+    .faq-section { margin-top: 20px; }
+    .faq-item { margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+    .faq-question {
+      font-weight: 600;
+      cursor: pointer;
+      position: relative;
+      padding-right: 20px;
+    }
+    .faq-question::after {
+      content: "+";
+      position: absolute;
+      right: 0;
+      top: 0;
+      font-size: 20px;
+    }
+    .faq-question.active::after { content: "-"; }
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    .faq-answer.open { max-height: 200px; }
+    
+
+    #medicines .search-medicines {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    #medicines .search-medicines input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      transition: border-color 0.3s;
+    }
+    #medicines .search-medicines input[type="text"]:focus { border-color: #007BFF; }
+    #medicines .search-medicines button {
+      padding: 10px 20px;
+      background: #007BFF;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    #medicines .search-medicines button:hover { background: #0056b3; }
+    #medicines #results { list-style: none; padding: 0; }
+    #medicines #results li {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    #medicines #results li img {
+      border-radius: 6px;
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+    }
+    #medicines #results li p { flex: 1; }
+    #medicines #results li button {
+      background: #28a745;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    #medicines #results li button:hover { background: #218838; }
+    
+   
+    .right-panel {
+      flex: 3;
+      min-width: 250px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      height: fit-content;
+    }
+    .right-panel h3 {
+      margin-bottom: 15px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 2px;
+    }
+    .right-panel p { margin-bottom: 5px; }
+    .right-panel .logout-btn {
+      background: #dc3545;
+      border: none;
+      padding: 5px 5px;
+      color: #fff;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .right-panel .logout-btn:hover { background: #c82333; }
+    .right-panel ul { list-style: none; padding: 0; }
+    .right-panel ul li {
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+      border-bottom: 1px solid #eee;
+      padding: 5px 0;
+    }
+    .right-panel ul li img {
+      border-radius: 0px;
+      width: 90px;
+      height: 80px;
+      object-fit: cover;
+      margin-right: 10px;
+    }
+    
+    
+    .modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;  
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 350px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    .modal-content h2 { margin-top: 0; }
+    .modal-content input,
+    .modal-content select {
+      width: calc(100% - 22px);
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+    .modal-content input:focus,
+    .modal-content select:focus { border-color: #007BFF; }
+    .modal-content button {
+      background: #007BFF;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .modal-content button:hover { background: #0056b3; }
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .close:hover { color: #000; }
+    
+    /* Адаптив */
+    @media (max-width: 992px) {
+      .container { flex-direction: column; }
+      .right-panel { margin-top: 20px; }
+      .horizontal-nav { padding: 10px 20px; }
+    }
+  </style>
 </head>
 <body>
-    <h1>Drug Search</h1>
-    <input type="text" id="search" placeholder="Enter medicine name">
-    <button onclick="searchMedicine()">Search</button>
-    <p id="error-message" class="error" style="display: none;">Please enter a valid medicine name</p>
-    <p id="not-found-message" class="error" style="display: none;">No medicines found. Please enter a valid name.</p>
-    <ul id="results"></ul>
-    <script src="/static/New.js"></script>
+ 
+  <header>
+    <div class="logo">med<span>e</span>lement</div>
+    <nav>
+      <a href="#">Пациентам</a>
+      <a href="#">Врачам</a>
+      <a href="#">Клиникам</a>
+    </nav>
+    <div class="auth-buttons">
+      <button onclick="toggleModal('login-modal')">Войти</button>
+      <button onclick="toggleModal('register-modal')">Регистрация</button>
+    </div>
+  </header>
+  
+  
+  <section class="hero" id="hero">
+    <div class="hero-content">
+      <h1>Добро пожаловать в Медицинскую Платформу</h1>
+      <p>Найдите лучших врачей, клиники и лекарства в одном месте</p>
+      <button onclick="showSection('medicines')">Найти лекарства</button>
+    </div>
+  </section>
+  
+ 
+  <nav class="horizontal-nav">
+    <ul>
+      <li onclick="showSection('home')">Главная</li>
+      <li onclick="showSection('doctors')">Врачи и клиники</li>
+      <li onclick="showSection('articles')">Статьи о здоровье</li>
+      <li onclick="showSection('reference')">Справочная система</li>
+      <li onclick="showSection('medicines')">Лекарства</li>
+      <li onclick="showSection('news')">Новости</li>
+      <li onclick="showSection('ads')">Реклама</li>
+      <li onclick="showSection('clinic')">Сайт для клиники</li>
+    </ul>
+  </nav>
+  
+
+  <main class="container">
+ 
+    <div class="main-content">
+    
+      <div id="home" class="content-section">
+        <h2>Медицинский Справочник</h2>
+        <p>Добро пожаловать на нашу платформу! Прокрутите ниже, чтобы ознакомиться с актуальной информацией о здоровье, новостями, рекламой и часто задаваемыми вопросами.</p>
+        
+      
+        <section id="health-articles">
+          <h3>Статьи о здоровье</h3>
+          <div class="articles-grid">
+            <div class="article-card">
+              <img src="https://via.placeholder.com/300x200" alt="Статья 1">
+              <h4>Польза здорового питания</h4>
+              <p>Узнайте, как правильно питаться для поддержания здоровья.</p>
+            </div>
+            <div class="article-card">
+              <img src="https://via.placeholder.com/300x200" alt="Статья 2">
+              <h4>Физическая активность</h4>
+              <p>Эффективные тренировки и советы для поддержания тонуса.</p>
+            </div>
+            <div class="article-card">
+              <img src="https://via.placeholder.com/300x200" alt="Статья 3">
+              <h4>Профилактика заболеваний</h4>
+              <p>Советы по предотвращению распространенных заболеваний.</p>
+            </div>
+          </div>
+        </section>
+        
+ 
+        <section id="news-section">
+          <h3>Новости</h3>
+          <div class="news-list">
+            <div class="news-item">
+              <img src="https://via.placeholder.com/150x100" alt="Новость 1">
+              <div class="news-content">
+                <h4>Новое исследование</h4>
+                <p>Учёные обнаружили новый метод лечения хронических заболеваний.</p>
+              </div>
+            </div>
+            <div class="news-item">
+              <img src="https://via.placeholder.com/150x100" alt="Новость 2">
+              <div class="news-content">
+                <h4>Обновление законодательства</h4>
+                <p>Приняты новые правила лицензирования медицинских учреждений.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+    
+        <section id="ads-section">
+          <h3>Реклама</h3>
+          <div class="ads-grid">
+            <div class="ad-card">
+              <img src="https://via.placeholder.com/300x200" alt="Реклама 1">
+              <p>Реклама бренда X</p>
+            </div>
+            <div class="ad-card">
+              <img src="https://via.placeholder.com/300x200" alt="Реклама 2">
+              <p>Реклама бренда Y</p>
+            </div>
+          </div>
+        </section>
+        
+     
+        <section id="faq-section" class="faq-section">
+          <h3>FAQ</h3>
+          <div class="faq-item">
+            <div class="faq-question">Как зарегистрироваться на платформе?</div>
+            <div class="faq-answer">
+              <p>Нажмите кнопку "Регистрация" в правом верхнем углу и заполните необходимые поля.</p>
+            </div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-question">Как добавить статью в избранное?</div>
+            <div class="faq-answer">
+              <p>Нажмите на кнопку "В избранное" рядом с интересующей вас статьёй.</p>
+            </div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-question">Как связаться с поддержкой?</div>
+            <div class="faq-answer">
+              <p>Отправьте сообщение на email support@medelement.com.</p>
+            </div>
+          </div>
+        </section>
+      </div>
+      
+      <!-- Секция "Лекарства" -->
+      <div id="medicines" class="content-section">
+        <h2>Лекарства</h2>
+        <div class="search-medicines">
+          <input type="text" id="search" placeholder="Введите название лекарства">
+          <button onclick="searchMedicine()">Найти лекарство</button>
+        </div>
+        <ul id="results"></ul>
+      </div>
+      
+  
+      <div id="doctors" class="content-section">
+        <h2>Врачи и клиники</h2>
+        <p>Содержимое раздела "Врачи и клиники" ...</p>
+      </div>
+      <div id="articles" class="content-section">
+        <h2>Статьи о здоровье</h2>
+        <p>Содержимое раздела "Статьи о здоровье" ...</p>
+      </div>
+      <div id="reference" class="content-section">
+        <h2>Справочная система</h2>
+        <p>Содержимое раздела "Справочная система" ...</p>
+      </div>
+      <div id="news" class="content-section">
+        <h2>Новости</h2>
+        <p>Содержимое раздела "Новости" ...</p>
+      </div>
+      <div id="mis" class="content-section">
+        <h2>МИС</h2>
+        <p>Содержимое раздела "МИС" ...</p>
+      </div>
+      <div id="ads" class="content-section">
+        <h2>Реклама</h2>
+        <p>Содержимое раздела "Реклама" ...</p>
+      </div>
+      <div id="clinic" class="content-section">
+        <h2>Сайт для клиники</h2>
+        <p>Содержимое раздела "Сайт для клиники" ...</p>
+      </div>
+    </div>
+    
+
+    <aside class="right-panel">
+      <h3>Профиль</h3>
+      <p id="user-info">Вы не авторизованы</p>
+      <button class="logout-btn" id="logout-btn" onclick="logoutUser()" style="display: none;">Выйти</button>
+      <h3>Избранное</h3>
+      <ul id="favorites-list"></ul>
+    </aside>
+  </main>
+  
+
+  <div id="login-modal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="toggleModal('login-modal')">&times;</span>
+      <h2>Вход</h2>
+      <input type="text" id="login-input" placeholder="Email / Телефон">
+      <input type="password" id="login-password" placeholder="Пароль">
+      <button onclick="loginUser()">Войти</button>
+      <p id="login-message"></p>
+    </div>
+  </div>
+  
+
+  <div id="register-modal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="toggleModal('register-modal')">&times;</span>
+      <h2>Регистрация</h2>
+   
+      <form id="register-form" onsubmit="event.preventDefault(); registerUser();">
+        <input type="text" id="first-name" placeholder="Имя">
+        <input type="text" id="last-name" placeholder="Фамилия">
+        <input type="email" id="email" placeholder="Email">
+        <input type="tel" id="phone" placeholder="Телефон (+7XXXXXXXXXX)">
+        <select id="city">
+          <option value="">Выберите город</option>
+          <option value="Астана">Астана</option>
+          <option value="Алматы">Алматы</option>
+        </select>
+        <input type="password" id="password" placeholder="Пароль">
+        <input type="password" id="confirm-password" placeholder="Подтвердите пароль">
+        <button type="submit">Зарегистрироваться</button>
+      </form>
+      <p id="message"></p>
+    </div>
+  </div>
+  
+  
+  
+ 
+  <div id="profile-modal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="toggleModal('profile-modal')">&times;</span>
+      <h2>Ваш профиль</h2>
+      <div id="profile-details">
+        <p><strong>Имя:</strong> <span id="profile-first-name">Загрузка...</span> <span id="profile-last-name"></span></p>
+        <p><strong>Email:</strong> <span id="profile-email">Загрузка...</span></p>
+        <p><strong>Телефон:</strong> <span id="profile-phone">Загрузка...</span></p>
+        <p><strong>Город:</strong> <span id="profile-city">Загрузка...</span></p>
+      </div>
+      <button onclick="enableProfileEditing()">Редактировать</button>
+      <div id="edit-profile-form" style="display: none;">
+        <input type="text" id="edit-first-name" placeholder="Имя">
+        <input type="text" id="edit-last-name" placeholder="Фамилия">
+        <input type="email" id="edit-email" placeholder="Email">
+        <input type="tel" id="edit-phone" placeholder="Телефон (+7XXXXXXXXXX)">
+        <button onclick="saveProfileChanges()">Сохранить</button>
+      </div>
+    </div>
+  </div>
+  
+  <script src="/static/New.js"></script>
+  <script>
+   
+    function showSection(sectionId) {
+      var section = document.getElementById(sectionId);
+      if (section) {
+       
+        var headerOffset = 120; 
+        var elementPosition = section.getBoundingClientRect().top;
+        var offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: "smooth"
+        });
+      }
+    }
+    
+  
+    const faqQuestions = document.querySelectorAll('.faq-question');
+    faqQuestions.forEach(question => {
+      question.addEventListener('click', function() {
+        this.classList.toggle('active');
+        const answer = this.nextElementSibling;
+        answer.classList.toggle('open');
+      });
+    });
+  </script>
 </body>
 </html>

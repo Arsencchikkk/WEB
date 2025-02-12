@@ -75,21 +75,21 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
-	log.Println("📩 Данные для входа:", input.Login)
+	log.Println("Данные для входа:", input.Login)
 
 	if err := config.DB.Where("email = ? OR phone = ?", input.Login, input.Login).First(&user).Error; err != nil {
-		log.Println("❌ Пользователь не найден!")
+		log.Println(" Пользователь не найден!")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Неверные учетные данные"})
 		return
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
-		log.Println("❌ Неверный пароль!")
+		log.Println(" Неверный пароль!")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Неверные учетные данные"})
 		return
 	}
 
-	log.Println("✅ Вход успешен:", user.ID)
+	log.Println(" Вход успешен:", user.ID)
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
 		"user_id": user.ID,
@@ -99,26 +99,26 @@ func LoginUser(c *gin.Context) {
 func GetProfile(c *gin.Context) {
 	userIDStr := c.Query("user_id")
 	if userIDStr == "" {
-		log.Println("❌ Ошибка: user_id отсутствует")
+		log.Println(" Ошибка: user_id отсутствует")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id обязателен"})
 		return
 	}
 
 	userID, err := strconv.Atoi(userIDStr)
 	if err != nil {
-		log.Println("❌ Ошибка: некорректный user_id", userIDStr)
+		log.Println(" Ошибка: некорректный user_id", userIDStr)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Некорректный user_id"})
 		return
 	}
 
 	var user models.User
 	if err := config.DB.First(&user, userID).Error; err != nil {
-		log.Println("❌ Ошибка: пользователь не найден, user_id =", userID)
+		log.Println(" Ошибка: пользователь не найден, user_id =", userID)
 		c.JSON(http.StatusNotFound, gin.H{"error": "Пользователь не найден"})
 		return
 	}
 
-	log.Println("✅ Профиль загружен:", user)
+	log.Println(" Профиль загружен:", user)
 
 	c.JSON(http.StatusOK, gin.H{
 		"first_name": user.FirstName,
@@ -137,25 +137,25 @@ func UpdateProfile(c *gin.Context) {
 		Phone     *string `json:"phone"`
 	}
 
-	log.Println("📩 Получен запрос на обновление профиля")
+	log.Println(" Получен запрос на обновление профиля")
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		log.Println("❌ Ошибка парсинга JSON:", err)
+		log.Println(" Ошибка парсинга JSON:", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Некорректные данные"})
 		return
 	}
 
-	log.Println("📨 Данные от клиента:", input)
+	log.Println(" Данные от клиента:", input)
 
 	if input.UserID == 0 {
-		log.Println("❌ Ошибка: user_id отсутствует или равен 0")
+		log.Println(" Ошибка: user_id отсутствует или равен 0")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id обязателен"})
 		return
 	}
 
 	var user models.User
 	if err := config.DB.First(&user, input.UserID).Error; err != nil {
-		log.Println("❌ Ошибка: пользователь не найден, user_id =", input.UserID)
+		log.Println(" Ошибка: пользователь не найден, user_id =", input.UserID)
 		c.JSON(http.StatusNotFound, gin.H{"error": "Пользователь не найден"})
 		return
 	}
@@ -174,11 +174,34 @@ func UpdateProfile(c *gin.Context) {
 	}
 
 	if err := config.DB.Save(&user).Error; err != nil {
-		log.Println("❌ Ошибка обновления БД:", err)
+		log.Println(" Ошибка обновления БД:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка обновления профиля"})
 		return
 	}
 
-	log.Println("✅ Профиль успешно обновлён:", user)
+	log.Println(" Профиль успешно обновлён:", user)
 	c.JSON(http.StatusOK, gin.H{"message": "Профиль обновлён!"})
+}
+
+func DeleteUser(c *gin.Context) {
+
+	idStr := c.Param("id")
+	userID, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Некорректный user_id"})
+		return
+	}
+
+	var user models.User
+	if err := config.DB.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Пользователь не найден"})
+		return
+	}
+
+	if err := config.DB.Delete(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при удалении пользователя"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Пользователь удалён"})
 }

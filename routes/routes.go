@@ -9,6 +9,7 @@ import (
 func SetupMedicineRoutes(router *gin.Engine) {
 	router.GET("/medicines", controllers.GetMedicines)
 	router.GET("/medicines/search", controllers.SearchMedicine)
+	router.GET("/medicines/category", controllers.GetMedicinesByCategory)
 }
 
 func SetupFavoritesRoutes(router *gin.Engine) {
@@ -22,4 +23,9 @@ func SetupUserRoutes(router *gin.Engine) {
 	router.POST("/login", controllers.LoginUser)
 	router.GET("/profile", controllers.GetProfile)
 	router.PUT("/update-profile", controllers.UpdateProfile)
+	router.DELETE("/delete-user", controllers.DeleteUser)
+}
+
+func SetupClinicRoutes(router *gin.Engine) {
+	router.GET("/clinics", controllers.GetClinicsByCity)
 }

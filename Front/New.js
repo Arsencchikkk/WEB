@@ -67,6 +67,38 @@ async function searchMedicine() {
         alert("Ошибка загрузки данных. Попробуйте снова!");
     }
 }
+function filterByCategory() {
+    var category = document.getElementById('medicine-category').value;
+    if (!category) {
+      alert("Пожалуйста, выберите категорию");
+      return;
+    }
+    
+    fetch('/medicines/category?category=' + encodeURIComponent(category))
+      .then(response => response.json())
+      .then(data => {
+        const results = document.getElementById('results');
+        results.innerHTML = "";
+        
+        if (!Array.isArray(data) || data.length === 0) {
+          results.innerHTML = "<li>Лекарства не найдены</li>";
+          return;
+        }
+        
+        data.forEach(med => {
+          let li = document.createElement('li');
+          li.innerHTML = `
+            <img src="${med.image_url}" alt="${med.name}" style="width: 100px; height: 100px;">
+            <strong>${med.name}</strong> - ${med.description}
+          `;
+          results.appendChild(li);
+        });
+      })
+      .catch(error => console.error('Ошибка при получении данных:', error));
+  }
+  
+  window.filterByCategory = filterByCategory;
+  
 
 // 🌟 Функция переключения модального окна
 function toggleModal(modalId) {
@@ -141,6 +173,77 @@ async function registerUser() {
 }
 
 
+function renderClinicCards(clinics) {
+    const container = document.getElementById("clinic-cards");
+    container.innerHTML = "";
+  
+    if (!Array.isArray(clinics) || clinics.length === 0) {
+      container.innerHTML = "<p>Клиники не найдены</p>";
+      return;
+    }
+    
+    clinics.forEach(clinic => {
+      const card = document.createElement("div");
+      card.className = "clinic-card";
+      card.innerHTML = `
+        <img src="${clinic.image_url}" alt="${clinic.name}">
+        <div class="clinic-info">
+          <h3>${clinic.name}</h3>
+          <p class="address">${clinic.address}</p>
+          <p class="website"><a href="${clinic.url}" target="_blank">${clinic.url}</a></p>
+          <p class="description">${clinic.description}</p>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+  
+  // Функция фильтрации клиник 
+  function filterClinicsByCity() {
+    const city = document.getElementById('clinic-city').value;
+    if (!city) {
+      alert("Пожалуйста, выберите город");
+      return;
+    }
+    
+    // Выполняем запрос к серверу
+    fetch('/clinics?city=' + encodeURIComponent(city))
+      .then(response => {
+       
+        if (!response.ok) {
+          throw new Error("Ошибка сервера: " + response.status);
+        }
+        return response.json();
+      })
+      .then(data => {
+    
+        renderClinicCards(data);
+      })
+      .catch(error => console.error("Ошибка при получении клиник:", error));
+  }
+  
+  window.filterClinicsByCity = filterClinicsByCity;
+  
+
+  document.addEventListener("DOMContentLoaded", function () {
+
+    const city = document.getElementById('clinic-city').value;
+    if (city) {
+      filterClinicsByCity();
+    } else {
+      // Если город не выбран, можно отобразить сообщение или загрузить все клиники,
+      // если на сервере реализована логика для пустого значения.
+      // Например, можно сделать:
+      fetch('/clinics')
+        .then(response => response.json())
+        .then(data => renderClinicCards(data))
+        .catch(error => console.error("Ошибка при получении всех клиник:", error));
+    }
+  });
+  
+  
+  
+  
 
 // 🌟 Вход в аккаунт
 async function loginUser() {
@@ -248,10 +351,10 @@ async function loadFavorites() {
             li.innerHTML = `
                 <img src="${fav.medicine.image_url || 'https://via.placeholder.com/100'}" 
                      alt="${fav.medicine.name}" 
-                     style="width: 100px; height: 100px;" 
+                     style="width: 80px; height: 100px;" 
                      onerror="this.onerror=null; this.src='https://via.placeholder.com/100';">
                 <p><b>${fav.medicine.name}</b> - ${fav.medicine.description} 
-                (Категория: ${fav.medicine.category}, Цена: $${fav.medicine.price})</p>
+                (Категория: ${fav.medicine.category}, Цена: KZT ${fav.medicine.price})</p>
                 <button onclick="removeFromFavorites(${fav.id})">❌ Удалить</button>
             `;
             favoritesList.appendChild(li);
@@ -485,7 +588,7 @@ async function saveProfileChanges() {
 
         if (response.ok) {
             alert("Профиль обновлён!");
-            loadUserProfile(); // ✅ Загружаем обновлённый профиль
+            loadUserProfile(); 
             toggleModal("profile-modal");
         } else {
             alert("Ошибка: " + data.error);
@@ -495,6 +598,41 @@ async function saveProfileChanges() {
         alert("Ошибка сервера!");
     }
 }
+
+
+function deleteUser() {
+    const userId = localStorage.getItem("user_id");
+    if (!userId) {
+      alert("Вы не авторизованы");
+      return;
+    }
+  
+    if (!confirm("Вы действительно хотите удалить аккаунт? Это действие необратимо.")) {
+      return;
+    }
+  
+    fetch('/users/' + userId, {
+      method: 'DELETE'
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Ошибка сервера: " + response.status);
+      }
+      return response.json();
+    })
+    .then(data => {
+      alert(data.message || "Аккаунт удалён");
+      localStorage.removeItem("user_id");
+      window.location.href = '/';
+    })
+    .catch(error => {
+      console.error("Ошибка при удалении аккаунта:", error);
+      alert("Ошибка удаления аккаунта");
+    });
+  }
+  
+  window.deleteUser = deleteUser;
+  
 
 
 const faqQuestions = document.querySelectorAll('.faq-question');

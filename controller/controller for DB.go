@@ -40,3 +40,17 @@ func SearchMedicine(c *gin.Context) {
 
 	c.JSON(http.StatusOK, medicines)
 }
+func GetMedicinesByCategory(c *gin.Context) {
+	category := c.Query("category")
+	if category == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Category parameter is required"})
+		return
+	}
+	var medicines []models.Medicine
+	result := config.DB.Where("category = ?", category).Find(&medicines)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+		return
+	}
+	c.JSON(http.StatusOK, medicines)
+}

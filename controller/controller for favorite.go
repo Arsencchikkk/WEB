@@ -29,7 +29,6 @@ func AddToFavorites(c *gin.Context) {
 		return
 	}
 
-	// Проверяем,что леки не дублировались
 	var existing models.Favorite
 	result := config.DB.Where("user_id = ? AND medicine_id = ?", favorite.UserID, favorite.MedicineID).First(&existing)
 	if result.RowsAffected > 0 {
@@ -41,7 +40,6 @@ func AddToFavorites(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Medicine added to favorites!"})
 }
 
-// Удалить  леки из избранного
 func RemoveFromFavorites(c *gin.Context) {
 	id := c.Param("id")
 	if err := config.DB.Delete(&models.Favorite{}, id).Error; err != nil {

@@ -24,3 +24,7 @@ func SetupUserRoutes(router *gin.Engine) {
 	router.GET("/profile", controllers.GetProfile)
 	router.PUT("/update-profile", controllers.UpdateProfile)
 }
+
+func SetupClinicRoutes(router *gin.Engine) {
+	router.POST("/clinics", controllers.GetClinicsByCity)
+}

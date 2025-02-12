@@ -600,38 +600,32 @@ async function saveProfileChanges() {
 }
 
 
-function deleteUser() {
-    const userId = localStorage.getItem("user_id");
-    if (!userId) {
-      alert("Вы не авторизованы");
-      return;
+function deleteProfile() {
+    if (confirm("Вы уверены, что хотите удалить профиль?")) {
+        const userId = localStorage.getItem("user_id"); // Adjust based on how you store user ID
+        if (!userId) {
+            alert("Ошибка: Не удалось получить user_id.");
+            return;
+        }
+
+        fetch('/delete-profile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: parseInt(userId) })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert("Профиль удален!");
+                localStorage.clear(); // Clear user data from local storage
+                window.location.href = "/"; // Redirect to homepage
+            } else {
+                alert("Ошибка: " + data.error);
+            }
+        })
+        .catch(error => console.error('Ошибка:', error));
     }
-  
-    if (!confirm("Вы действительно хотите удалить аккаунт? Это действие необратимо.")) {
-      return;
-    }
-  
-    fetch('/users/' + userId, {
-      method: 'DELETE'
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error("Ошибка сервера: " + response.status);
-      }
-      return response.json();
-    })
-    .then(data => {
-      alert(data.message || "Аккаунт удалён");
-      localStorage.removeItem("user_id");
-      window.location.href = '/';
-    })
-    .catch(error => {
-      console.error("Ошибка при удалении аккаунта:", error);
-      alert("Ошибка удаления аккаунта");
-    });
-  }
-  
-  window.deleteUser = deleteUser;
+}
   
 
 

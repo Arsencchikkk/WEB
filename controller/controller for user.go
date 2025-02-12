@@ -182,3 +182,44 @@ func UpdateProfile(c *gin.Context) {
 	log.Println("✅ Профиль успешно обновлён:", user)
 	c.JSON(http.StatusOK, gin.H{"message": "Профиль обновлён!"})
 }
+
+
+
+
+
+
+func DeleteUser(c *gin.Context) {
+	var input struct {
+		UserID int `json:"user_id"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		log.Println("❌ Ошибка парсинга JSON:", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Некорректные данные"})
+		return
+	}
+
+	log.Println("📨 Запрос на удаление пользователя:", input.UserID)
+
+	if input.UserID == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user_id обязателен"})
+		return
+	}
+
+	var user models.User
+	if err := config.DB.First(&user, input.UserID).Error; err != nil {
+		log.Println("❌ Пользователь не найден, user_id =", input.UserID)
+		c.JSON(http.StatusNotFound, gin.H{"error": "Пользователь не найден"})
+		return
+	}
+
+	if err := config.DB.Delete(&user).Error; err != nil {
+		log.Println("❌ Ошибка при удалении пользователя:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка удаления пользователя"})
+		return
+	}
+
+	log.Println("✅ Пользователь успешно удален:", input.UserID)
+	c.JSON(http.StatusOK, gin.H{"message": "Профиль удален"})
+}
+

@@ -182,26 +182,3 @@ func UpdateProfile(c *gin.Context) {
 	log.Println(" Профиль успешно обновлён:", user)
 	c.JSON(http.StatusOK, gin.H{"message": "Профиль обновлён!"})
 }
-
-func DeleteUser(c *gin.Context) {
-
-	idStr := c.Param("id")
-	userID, err := strconv.Atoi(idStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Некорректный user_id"})
-		return
-	}
-
-	var user models.User
-	if err := config.DB.First(&user, userID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Пользователь не найден"})
-		return
-	}
-
-	if err := config.DB.Delete(&user).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при удалении пользователя"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Пользователь удалён"})
-}

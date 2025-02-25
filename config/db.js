@@ -14,7 +14,7 @@ let db;
 async function connectDB() {
   try {
     await client.connect();
-    db = client.db("local"); // Название вашей базы
+    db = client.db("test"); // Название вашей базы
     console.log("Подключение к MongoDB успешно!");
   } catch (err) {
     console.error("Ошибка подключения к MongoDB:", err);
@@ -28,5 +28,6 @@ function getDB() {
   }
   return db;
 }
+
 
 module.exports = { connectDB, getDB };

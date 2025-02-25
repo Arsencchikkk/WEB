@@ -1,10 +1,8 @@
-// app.js
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
-const { connectDB } = require('./config/db');
-
+const { connectDB, getDB } = require('./config/db');
 const routes = require('./routes');
 
 const app = express();
@@ -17,7 +15,7 @@ app.use(cors({
   credentials: true,
 }));
 
-connectDB();
+// Подключаем маршруты
 app.use('/', routes);
 
 // Статические файлы и HTML
@@ -36,4 +34,20 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+async function init() {
+  try {
+    // Подключаемся к базе данных
+    await connectDB();
+    const db = getDB();
+
+    
+    // Запускаем сервер
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  } catch (err) {
+    console.error("Ошибка инициализации:", err);
+    process.exit(1);
+  }
+}
+
+init();

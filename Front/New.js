@@ -266,7 +266,7 @@ async function registerUser() {
     }
 
     try {
-        const response = await fetch('/register', {
+        const response = await fetch('/users/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -315,7 +315,7 @@ async function loginUser() {
     }
 
     try {
-        const response = await fetch('/login', {
+        const response = await fetch('.users/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ login: loginInput, password })
@@ -587,7 +587,6 @@ async function saveProfileChanges() {
         return;
     }
 
-    // 🛠️ ИСПРАВЛЕНО: Объявляем переменные перед использованием
     let firstName = document.getElementById("edit-first-name")?.value.trim();
     let lastName = document.getElementById("edit-last-name")?.value.trim();
     let email = document.getElementById("edit-email")?.value.trim();
@@ -599,11 +598,12 @@ async function saveProfileChanges() {
     }
 
     try {
-        const response = await fetch(`/update-profile`, {
+        // Изменили URL с '/users/update-profile' на '/users/profile'
+        const response = await fetch(`/users/profile`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                user_id: userId,
+                user_id: userId,  // Если сервер извлекает user_id из токена, этот параметр можно не передавать
                 first_name: firstName,
                 last_name: lastName,
                 email: email,
@@ -624,35 +624,82 @@ async function saveProfileChanges() {
         alert("Ошибка сервера!");
     }
 }
-
-
-
-function deleteProfile() {
-    if (confirm("Вы уверены, что хотите удалить профиль?")) {
-        const userId = localStorage.getItem("user_id");
-        if (!userId) {
-            alert("Ошибка: Не удалось получить user_id.");
-            return;
-        }
-
-        fetch('/users', {  
-            method: 'DELETE', 
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: String(userId) })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.message) {
-                alert("Профиль удален!");
-                localStorage.clear(); 
-                window.location.href = "/"; 
-            } else {
-                alert("Ошибка: " + data.error);
-            }
-        })
-        .catch(error => console.error('Ошибка:', error));
+async function saveProfileChanges() {
+    const token = localStorage.getItem("token")?.trim();
+    if (!token) {
+      alert("Сначала войдите в систему!");
+      return;
     }
-}
+    // Собираем данные из формы
+    let firstName = document.getElementById("edit-first-name").value.trim();
+    let lastName = document.getElementById("edit-last-name").value.trim();
+    let email = document.getElementById("edit-email").value.trim();
+    let phone = document.getElementById("edit-phone").value.trim();
+    if (!firstName || !lastName || !email || !phone) {
+      alert("Все поля обязательны!");
+      return;
+    }
+    try {
+      const response = await fetch(`/users/profile`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({
+          first_name: firstName,
+          last_name: lastName,
+          email: email,
+          phone: phone
+        })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        alert("Профиль обновлён!");
+        loadUserProfile();
+        toggleModal("profile-modal");
+      } else {
+        alert("Ошибка: " + data.error);
+      }
+    } catch (error) {
+      console.error("Ошибка обновления профиля:", error);
+      alert("Ошибка сервера!");
+    }
+  }
+  
+
+
+
+  function deleteProfile() {
+    if (confirm("Вы уверены, что хотите удалить профиль?")) {
+      const token = localStorage.getItem("token")?.trim();
+      if (!token) {
+        alert("Ошибка: Вы не авторизованы!");
+        return;
+      }
+  
+      fetch('/users/profile', {  
+        method: 'DELETE', 
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        }
+        // Тело запроса не нужно, так как user_id извлекается из токена
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.message) {
+          alert("Профиль удален!");
+          localStorage.clear(); 
+          window.location.href = "/";
+        } else {
+          alert("Ошибка: " + data.error);
+        }
+      })
+      .catch(error => console.error('Ошибка:', error));
+    }
+  }
+  
 
 // Функция для фильтрации клиник по городу
 async function filterClinicsByCity() {

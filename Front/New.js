@@ -241,9 +241,41 @@ function toggleModal(modalId) {
     }
 }
 
-// Регистрация пользователя
-// Регистрация пользователя с сохранением JWT-токена
-async function registerUser() {
+
+// Функция для запроса OTP (использует endpoint /auth/request-otp)
+// Функция для запроса OTP
+async function requestOTPForRegistration() {
+    const email = document.getElementById("email").value.trim();
+    const messageEl = document.getElementById("message");
+  
+    if (!email) {
+      alert("Введите email для получения OTP");
+      return;
+    }
+  
+    try {
+      const response = await fetch('/auth/request-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        messageEl.textContent = data.message;
+        messageEl.style.color = "green";
+      } else {
+        messageEl.textContent = data.error;
+        messageEl.style.color = "red";
+      }
+    } catch (error) {
+      console.error("Ошибка при запросе OTP:", error);
+      messageEl.textContent = "Ошибка соединения при запросе OTP";
+      messageEl.style.color = "red";
+    }
+  }
+  
+  // Функция регистрации, которая сперва проверяет OTP
+  async function registerUser() {
     const firstName = document.getElementById("first-name").value.trim();
     const lastName = document.getElementById("last-name").value.trim();
     const email = document.getElementById("email").value.trim();
@@ -251,56 +283,76 @@ async function registerUser() {
     const city = document.getElementById("city").value.trim();
     const password = document.getElementById("password").value.trim();
     const confirmPassword = document.getElementById("confirm-password").value.trim();
+    const otp = document.getElementById("otp-code").value.trim();
     const message = document.getElementById("message");
-
-    if (!firstName || !lastName || !email || !phone || !city || !password || !confirmPassword) {
-        message.textContent = "Все поля обязательны!";
-        message.style.color = "red";
-        return;
+  
+    // Проверка, что все поля заполнены
+    if (!firstName || !lastName || !email || !phone || !city || !password || !confirmPassword || !otp) {
+      message.textContent = "Все поля обязательны!";
+      message.style.color = "red";
+      return;
     }
-
     if (password !== confirmPassword) {
-        message.textContent = "Пароли не совпадают!";
+      message.textContent = "Пароли не совпадают!";
+      message.style.color = "red";
+      return;
+    }
+  
+    
+    try {
+      const verifyResponse = await fetch('/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp })
+      });
+      const verifyData = await verifyResponse.json();
+      if (!verifyResponse.ok) {
+        message.textContent = verifyData.error || "Ошибка проверки OTP";
         message.style.color = "red";
         return;
-    }
-
-    try {
-        const response = await fetch('/users/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                first_name: firstName,
-                last_name: lastName,
-                email: email,      
-                phone: phone,
-                city: city,
-                password: password
-            })
-        });
-
-        const data = await response.json();
-        console.log("Ответ сервера (register):", data);
-
-        if (response.ok && data.user_id && data.token) {
-            localStorage.setItem("user_id", data.user_id);
-            localStorage.setItem("token", data.token);
-            console.log("User ID сохранён:", localStorage.getItem("user_id"));
-            console.log("Token сохранён:", localStorage.getItem("token"));
-
-            message.textContent = "Регистрация успешна!";
-            message.style.color = "green";
-            toggleModal('register-modal');
-        } else {
-            message.textContent = data.error || "Ошибка регистрации!";
-            message.style.color = "red";
-        }
+      }
     } catch (error) {
-        console.error("Ошибка при регистрации:", error);
-        message.textContent = "Ошибка соединения!";
-        message.style.color = "red";
+      console.error("Ошибка проверки OTP:", error);
+      message.textContent = "Ошибка соединения при проверке OTP";
+      message.style.color = "red";
+      return;
     }
-}
+  
+    
+    try {
+      const response = await fetch('/users/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          first_name: firstName,
+          last_name: lastName,
+          email,
+          phone,
+          city,
+          password
+        })
+      });
+      const data = await response.json();
+      if (response.ok && data.user_id && data.token) {
+        
+        localStorage.setItem("user_id", data.user_id);
+        localStorage.setItem("token", data.token);
+  
+        message.textContent = "Регистрация успешна!";
+        message.style.color = "green";
+        toggleModal('register-modal');
+      } else {
+        message.textContent = data.error || "Ошибка регистрации!";
+        message.style.color = "red";
+      }
+    } catch (error) {
+      console.error("Ошибка при регистрации:", error);
+      message.textContent = "Ошибка соединения!";
+      message.style.color = "red";
+    }
+  }
+  
+  
 
 // Вход пользователя с сохранением JWT-токена
 async function loginUser() {
@@ -315,7 +367,7 @@ async function loginUser() {
     }
 
     try {
-        const response = await fetch('.users/login', {
+        const response = await fetch('/users/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ login: loginInput, password })
@@ -759,3 +811,28 @@ faqQuestions.forEach(question => {
         answer.classList.toggle('open');
     });
 });
+
+document.getElementById("admin-login-form").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const email = document.getElementById("admin-email").value.trim();
+    const password = document.getElementById("admin-password").value.trim();
+    try {
+      const response = await fetch("/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await response.json();
+      if (response.ok && data.token) {
+        localStorage.setItem("admin_token", data.token);
+        // Переключаем отображение админской панели
+        document.getElementById("admin-login-form").style.display = "none";
+        document.getElementById("admin-content").style.display = "block";
+      } else {
+        alert(data.error || "Неверные учетные данные");
+      }
+    } catch (err) {
+      console.error("Ошибка админ логина:", err);
+      alert("Ошибка сервера");
+    }
+  });

@@ -1,21 +1,16 @@
-// routes/admin.js
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/admin');
+const authenticateToken = require('../middleware/auth');
 
-// POST /admin/medicine
-router.post('/medicine', adminController.addMedicine);
+// Админский логин
+router.post('/login', adminController.adminLogin);
 
-// DELETE /admin/medicine/:id
-router.delete('/medicine/:id', adminController.deleteMedicine);
-
-// DELETE /admin/user
-router.delete('/user', adminController.deleteUserAdmin);
-
-// POST /admin/clinic
-router.post('/clinic', adminController.addClinic);
-
-// GET /admin/dashboard
-router.get('/dashboard', adminController.adminDashboard);
+// Другие админские маршруты (защищенные)
+router.post('/medicine', authenticateToken, adminController.addMedicine);
+router.delete('/medicine/:id', authenticateToken, adminController.deleteMedicine);
+router.delete('/user', authenticateToken, adminController.deleteUserAdmin);
+router.post('/clinic', authenticateToken, adminController.addClinic);
+router.get('/dashboard', authenticateToken, adminController.adminDashboard);
 
 module.exports = router;

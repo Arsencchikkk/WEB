@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Админка</title>
+  <link rel="stylesheet" href="/static/admin.css">
+  <style>
+    /* Пример минимальных стилей для админки */
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f2f2f2;
+      margin: 20px;
+    }
+    h1, h2 {
+      text-align: center;
+      color: #333;
+    }
+    form {
+      background: #fff;
+      padding: 20px;
+      margin: 20px auto;
+      max-width: 500px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    form input, form textarea, form select, form button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 16px;
+    }
+    form button {
+      background: #007BFF;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.3s;
+    }
+    form button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Админка</h1>
+  
+  <!-- Константа admin_id. ВНИМАНИЕ: этот идентификатор должен совпадать с тем, что используется в серверном коде. -->
+  <script>
+    const ADMIN_ID = "67b75f97a63dcb09618e8b92";
+  </script>
+  
+  <!-- Форма добавления лекарства -->
+  <section>
+    <h2>Добавить лекарство</h2>
+    <form id="add-medicine-form">
+      <input type="text" id="med-name" placeholder="Название" required>
+      <textarea id="med-description" placeholder="Описание" required></textarea>
+      <input type="text" id="med-category" placeholder="Категория" required>
+      <input type="text" id="med-dosage" placeholder="Дозировка" required>
+      <input type="text" id="med-manufacturer" placeholder="Производитель" required>
+      <input type="number" step="0.01" id="med-price" placeholder="Цена" required>
+      <input type="text" id="med-image" placeholder="URL изображения" required>
+      <button type="submit">Добавить лекарство</button>
+    </form>
+  </section>
+
+  <!-- Форма добавления клиники -->
+  <section>
+    <h2>Добавить клинику</h2>
+    <form id="add-clinic-form">
+      <input type="text" id="clinic-name" placeholder="Название" required>
+      <input type="text" id="clinic-city" placeholder="Город" required>
+      <input type="text" id="clinic-address" placeholder="Адрес" required>
+      <textarea id="clinic-description" placeholder="Описание"></textarea>
+      <input type="text" id="clinic-url" placeholder="Сайт">
+      <input type="text" id="clinic-image" placeholder="URL изображения" required>
+      <button type="submit">Добавить клинику</button>
+    </form>
+  </section>
+
+  <!-- Форма удаления пользователя -->
+  <section>
+    <h2>Удалить пользователя</h2>
+    <form id="delete-user-form">
+      <input type="text" id="delete-user-id" placeholder="User ID" required>
+      <button type="submit">Удалить пользователя</button>
+    </form>
+  </section>
+
+  <!-- Форма удаления лекарства -->
+  <section>
+    <h2>Удалить лекарство</h2>
+    <form id="delete-medicine-form">
+      <input type="text" id="delete-medicine-id" placeholder="Medicine ID" required>
+      <button type="submit">Удалить лекарство</button>
+    </form>
+  </section>
+
+  <script>
+    // Обработчик формы добавления лекарства
+    document.getElementById("add-medicine-form").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const med = {
+        name: document.getElementById("med-name").value,
+        description: document.getElementById("med-description").value,
+        category: document.getElementById("med-category").value,
+        dosage: document.getElementById("med-dosage").value,
+        manufacturer: document.getElementById("med-manufacturer").value,
+        price: parseFloat(document.getElementById("med-price").value),
+        availability: true,
+        image_url: document.getElementById("med-image").value
+      };
+      const response = await fetch("/admin/medicine?admin_id=" + ADMIN_ID, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(med)
+      });
+      const data = await response.json();
+      alert(data.message || data.error);
+    });
+
+    // Обработчик формы добавления клиники
+    document.getElementById("add-clinic-form").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const clinic = {
+        name: document.getElementById("clinic-name").value,
+        city: document.getElementById("clinic-city").value,
+        address: document.getElementById("clinic-address").value,
+        description: document.getElementById("clinic-description").value,
+        url: document.getElementById("clinic-url").value,
+        image_url: document.getElementById("clinic-image").value
+      };
+      const response = await fetch("/admin/clinic?admin_id=" + ADMIN_ID, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(clinic)
+      });
+      const data = await response.json();
+      alert(data.message || data.error);
+    });
+
+    // Обработчик формы удаления пользователя
+    document.getElementById("delete-user-form").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const userId = document.getElementById("delete-user-id").value;
+      const response = await fetch("/admin/user?admin_id=" + ADMIN_ID, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId })
+      });
+      const data = await response.json();
+      alert(data.message || data.error);
+    });
+
+    // Обработчик формы удаления лекарства
+    document.getElementById("delete-medicine-form").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const medId = document.getElementById("delete-medicine-id").value;
+      const response = await fetch("/admin/medicine/" + medId + "?admin_id=" + ADMIN_ID, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" }
+      });
+      const data = await response.json();
+      alert(data.message || data.error);
+    });
+  </script>
+</body>
+</html>

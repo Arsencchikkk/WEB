@@ -913,6 +913,40 @@
       .clinic-info a:hover {
         color: #0056b3;
       }
+      .modal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+  background: #fff;
+  margin: 10% auto;
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.modal-content .star-rating span {
+  font-size: 30px;
+  cursor: pointer;
+  color: #ccc;
+  transition: color 0.3s;
+}
+
+.modal-content .star-rating span:hover,
+.modal-content .star-rating span.active {
+  color: #FFD700;
+}
+
 
     
   </style>
@@ -949,7 +983,7 @@
   <nav class="horizontal-nav">
     <ul>
       <li onclick="showSection('home')">Главная</li>
-      <li onclick="showSection('doctors')">Врачи и клиники</li>
+      <li onclick="showSection('home')">Врачи и клиники</li>
       <li onclick="showSection('articles')">Статьи о здоровье</li>
       <li onclick="showSection('reference')">Справочная система</li>
       <li onclick="showSection('medicines')">Лекарства</li>
@@ -1339,12 +1373,34 @@
         <input type="tel" id="edit-phone" placeholder="Телефон (+7XXXXXXXXXX)">
         <button onclick="saveProfileChanges()">Сохранить</button>
         <button onclick="deleteProfile()">Удалить профиль</button>
-        
+
+
+
 
       </div>
     </div>
   </div>
-  
+
+  <!-- Модальное окно для отзыва -->
+<div id="review-modal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <span class="close" onclick="toggleModal('review-modal')">&times;</span>
+    <h2>Оставьте отзыв</h2>
+    <!-- Звёздный рейтинг -->
+    <div class="star-rating">
+      <span id="star1" onclick="setRating(1)">&#9733;</span>
+      <span id="star2" onclick="setRating(2)">&#9733;</span>
+      <span id="star3" onclick="setRating(3)">&#9733;</span>
+      <span id="star4" onclick="setRating(4)">&#9733;</span>
+      <span id="star5" onclick="setRating(5)">&#9733;</span>
+    </div>
+    <!-- Текстовый отзыв -->
+    <textarea id="review-comment" placeholder="Ваш отзыв..."></textarea>
+    <!-- Кнопка отправки отзыва -->
+    <button onclick="submitReview()">Отправить отзыв</button>
+  </div>
+</div>
+
 
   <script src="/static/New.js" defer></script>
 
